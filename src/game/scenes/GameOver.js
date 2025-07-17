@@ -32,8 +32,9 @@ export class GameOver extends Scene {
       })
       .setOrigin(0.5);
 
+    const yPos = 280;
     this.add
-      .text(512, 350, "Your Score: " + this.finalScore, {
+      .text(512, yPos, "Your Score: " + this.finalScore, {
         fontFamily: "Arial, sans-serif",
         fontSize: 48,
         color: "#ffffff",
@@ -42,16 +43,82 @@ export class GameOver extends Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(512, 420, "High Score: " + this.highScore, {
+      .text(512, yPos + 60, "High Score: " + this.highScore, {
         fontFamily: "Arial, sans-serif",
         fontSize: 48,
-        color: "#ffff00",
+        color: "#ffffff",
         align: "center",
       })
       .setOrigin(0.5);
 
+    // --- Player Rank and High Score Celebration ---
+    const leaderboard = JSON.parse(
+      localStorage.getItem("baristaLeaderboard") || "[]"
+    );
+    const playerName = localStorage.getItem("currentPlayerName") || "Player";
+
+    // More robustly find the player's rank by checking name and score
+    const rankIndex = leaderboard.findIndex(
+      (entry) => entry.score === this.finalScore && entry.name === playerName
+    );
+
+    if (rankIndex !== -1) {
+      this.add
+        .text(512, yPos + 110, `Your Rank: #${rankIndex + 1}`, {
+          fontFamily: "Arial, sans-serif",
+          fontSize: 32,
+          color: "#00ff00",
+          align: "center",
+        })
+        .setOrigin(0.5);
+
+      // --- New High Score Animation ---
+      if (rankIndex === 0 && this.finalScore > 0) {
+        const congratsText = this.add
+          .text(512, yPos + 160, "New High Score!", {
+            fontFamily: "Arial, sans-serif",
+            fontSize: 32,
+            color: "#ff8c00",
+            align: "center",
+          })
+          .setOrigin(0.5);
+        this.tweens.add({
+          targets: congratsText,
+          scale: 1.2,
+          duration: 500,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.easeInOut",
+        });
+
+        this.add.particles(0, 0, ['icon_blue', 'icon_green'], {
+            speed: { min: 200, max: 400 },
+            angle: { min: 0, max: 90 }, // Shoots right and down
+            scale: { start: 1, end: 0 },
+            lifespan: 1500,
+            gravityY: 400,
+            frequency: 100,
+            duration: 3000, // Stop emitting after 3 seconds
+            blendMode: 'ADD'
+        });
+
+        // Emitter for the top-right corner
+        this.add.particles(this.sys.game.config.width, 0, ['icon_red', 'icon_yellow'], {
+            speed: { min: 200, max: 400 },
+            angle: { min: 90, max: 180 }, // Shoots left and down
+            scale: { start: 1, end: 0 },
+            lifespan: 1500,
+            gravityY: 400,
+            frequency: 100,
+            duration: 3000, // Stop emitting after 3 seconds
+            blendMode: 'ADD'
+        });
+        
+      }
+    }
+
     const playAgainButton = this.add
-      .text(512, 550, "Play Again", {
+      .text(380, 550, "Play Again", {
         fontFamily: "Arial, sans-serif",
         fontSize: 38,
         color: "#00ff00",
@@ -63,7 +130,36 @@ export class GameOver extends Scene {
       .setInteractive();
 
     playAgainButton.on("pointerdown", () => {
-      this.scene.start("MainMenu");
+      this.scene.start("HomePage");
+    });
+
+    const leaderboardBtn = this.add
+      .text(640, 550, "Leaderboard", {
+        fontFamily: "Arial, sans-serif",
+        fontSize: 38,
+        color: "#00ff00",
+        backgroundColor: "#111111",
+        padding: { left: 20, right: 20, top: 10, bottom: 10 },
+        cornerRadius: 10,
+      })
+      .setOrigin(0.5)
+      .setInteractive();
+
+    leaderboardBtn.on("pointerdown", () => {
+      this.scene.start("Leaderboard");
+    });
+
+    [playAgainButton, leaderboardBtn].forEach((button) => {
+      button.on("pointerdown", () => {
+        this.tweens.add({
+          targets: button,
+          scale: 0.95,
+          duration: 100,
+          ease: "Power1",
+          yoyo: true,
+        });
+        this.sound.play("sfx_tap");
+      });
     });
 
     // Add this block at the end of the create() method in each scene

@@ -1,35 +1,41 @@
-import { Boot } from './scenes/Boot';
-import { Game as MainGame } from './scenes/Game';
-import { GameOver } from './scenes/GameOver';
-import { MainMenu } from './scenes/MainMenu';
-import { Preloader } from './scenes/Preloader';
-import { AUTO, Game } from 'phaser';
+import { Boot } from "./scenes/Boot";
+import { Preloader } from "./scenes/Preloader";
+import { Login } from "./scenes/Login"; // New
+import { HomePage } from "./scenes/HomePage"; // New
+import { Instructions } from "./scenes/Instructions"; // New
+import { Leaderboard } from "./scenes/Leaderboard"; // New
+import { Game as GameScene } from "./scenes/Game"; // Renamed for clarity
+import { GameOver } from "./scenes/GameOver";
+import { AUTO, Game } from "phaser";
 
-// Find out more information about the Game Config at:
-// https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config = {
-    type: AUTO,
-    width: 1024,
-    height: 768,
-    parent: 'game-container',
-    backgroundColor: '#028af8',
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    scene: [
-        Boot,
-        Preloader,
-        MainMenu,
-        MainGame,
-        GameOver
-    ]
+  type: AUTO,
+  width: 1024,
+  height: 768,
+  parent: "game-container",
+  backgroundColor: "#028af8",
+  // Enable DOM elements for the input form
+  dom: {
+    createContainer: true,
+  },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  scene: [
+    Boot,
+    Preloader,
+    Login,
+    HomePage,
+    Instructions,
+    Leaderboard,
+    GameScene,
+    GameOver,
+  ],
 };
 
 const StartGame = (parent) => {
-
-    return new Game({ ...config, parent });
-
-}
+  return new Game({ ...config, parent });
+};
 
 export default StartGame;

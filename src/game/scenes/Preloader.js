@@ -32,8 +32,9 @@ export class Preloader extends Scene {
 
     // --- All game assets are loaded here ---
 
-    this.load.image('logo', 'image/logo.png');
-    
+    this.load.image("logo", "image/logo.png");
+    this.load.image("avatar_icon", "image/avatar_icon.png");
+
     this.load.image("cup", "image/cup.png");
     this.load.image("icon_blue", "image/icon_blue.png");
     this.load.image("icon_red", "image/icon_red.png");
@@ -53,7 +54,7 @@ export class Preloader extends Scene {
 
   create() {
     //  When all the assets have loaded, move to the Main Menu.
-    this.scene.start("MainMenu");
+    this.scene.start("Login");
 
     // Add this block at the end of the create() method in each scene
 

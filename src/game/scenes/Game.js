@@ -199,22 +199,54 @@ export class Game extends Scene {
 
     if (this.timerTween) this.timerTween.stop();
     if (this.sequenceTimer) this.sequenceTimer.destroy();
-    this.tweens.killAll(); // Stop all tweens
-    this.time.removeAllEvents(); // Clear any pending delayed calls
+    this.tweens.killAll();
+    this.time.removeAllEvents();
 
     this.cameras.main.shake(250, 0.01);
 
-    let highScore = parseInt(
-      localStorage.getItem("baristaHighScore") || "0",
-      10
-    );
+    const playerName = localStorage.getItem("currentPlayerName") || "Player";
+    let leaderboard = [];
 
-    if (this.score > highScore) {
-      highScore = this.score;
-      localStorage.setItem("baristaHighScore", highScore);
+    try {
+      const storedLeaderboard = JSON.parse(
+        localStorage.getItem("baristaLeaderboard")
+      );
+      if (Array.isArray(storedLeaderboard)) {
+        leaderboard = storedLeaderboard;
+      }
+    } catch (error) {
+      console.error("Could not parse leaderboard. Resetting it.", error);
     }
 
+    leaderboard.push({
+      name: playerName,
+      score: this.score,
+      timestamp: Date.now(), // The current time in milliseconds
+    });
+
+    leaderboard.sort((a, b) => {
+      // First, sort by score in descending order
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      // If scores are tied, sort by timestamp in ascending order (earlier time wins)
+      return a.timestamp - b.timestamp;
+    });
+
+    const trimmedLeaderboard = leaderboard.slice(0, 10);
+    localStorage.setItem(
+      "baristaLeaderboard",
+      JSON.stringify(trimmedLeaderboard)
+    );
+
+    // This timed callback will execute after 500ms
     this.time.delayedCall(500, () => {
+      const highScore =
+        trimmedLeaderboard.length > 0
+          ? trimmedLeaderboard[0].score
+          : this.score;
+
+      // Now, highScore is guaranteed to be defined when starting the next scene.
       this.scene.start("GameOver", { score: this.score, highScore: highScore });
     });
   }
